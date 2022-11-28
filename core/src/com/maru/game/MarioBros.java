@@ -2,6 +2,7 @@ package com.maru.game;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.maru.game.screens.DropScreen;
 import com.maru.game.screens.MainScreen;
 
 public class MarioBros extends Game {
@@ -10,7 +11,7 @@ public class MarioBros extends Game {
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
-		setScreen(new MainScreen(this));
+		setScreen(new DropScreen(this));
 	}
 
 	@Override
