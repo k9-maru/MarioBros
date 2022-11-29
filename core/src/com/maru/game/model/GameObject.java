@@ -2,13 +2,10 @@ package com.maru.game.model;
 
 import com.badlogic.gdx.graphics.Texture;
 
-public class Bucket {
-    private Texture texture;
-    private double x;
-    private double y;
-
-    public Bucket() {
-    }
+public abstract class GameObject {
+    protected Texture texture;
+    protected double x;
+    protected double y;
 
     public Texture getTexture() {
         return texture;
@@ -32,13 +29,5 @@ public class Bucket {
 
     public void setY(double y) {
         this.y = y;
-    }
-
-    public void moveHorizontal(double x) {
-        this.x += x;
-    }
-
-    public void moveVertical(double y) {
-        this.y += y;
     }
 }

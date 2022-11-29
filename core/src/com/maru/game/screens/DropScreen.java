@@ -1,22 +1,19 @@
 package com.maru.game.screens;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.maru.game.MarioBros;
-import com.maru.game.model.Bucket;
 import com.maru.game.model.Drop;
+import com.maru.game.model.GameObject;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 
@@ -25,27 +22,21 @@ public class DropScreen implements Screen {
     private final static int HEIGHT = 640;
 
     private MarioBros game;
-    private Bucket bucket;
     private List<Drop> drops = new ArrayList<>();
     private Sound dropSound;
     private Music rainMusic;
+    private Texture background;
 
     private OrthographicCamera camera;
     private Viewport viewport;
 
     public DropScreen(MarioBros game) {
         this.game = game;
-        bucket = new Bucket();
-        bucket.setTexture(new Texture("bucket.png"));
-        bucket.setX(0);
-        bucket.setY(0 - HEIGHT / 2);
-
+        background = new Texture("background.jpg");
         dropSound = Gdx.audio.newSound(Gdx.files.internal("waterdrop.wav"));
         rainMusic = Gdx.audio.newMusic(Gdx.files.internal("undertreeinrain.mp3"));
-
         rainMusic.setLooping(true);
         rainMusic.play();
-
         camera = new OrthographicCamera();
         viewport = new FillViewport(WIDTH, HEIGHT, camera);
     }
@@ -57,21 +48,15 @@ public class DropScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClearColor(255, 255, 255, 0);
+        Gdx.gl.glClearColor(192 / 255f, 192 / 255f, 192 / 255f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         this.game.batch.setProjectionMatrix(camera.combined);
-        this.game.batch.begin();
-        this.game.batch.draw(bucket.getTexture(), Math.round(bucket.getX()), Math.round(bucket.getY()));
-        this.game.batch.end();
+        drawGameObject(background);
 
         handleInput();
         spawnRain();
-        for(Drop drop : drops){
-            drop.moveVertical();
-            this.game.batch.begin();
-            this.game.batch.draw(drop.getTexture(), Math.round(drop.getX()), Math.round(drop.getY()));
-            this.game.batch.end();
-        }
+        dropRain();
+        cleanDrop();
     }
 
     @Override
@@ -99,27 +84,51 @@ public class DropScreen implements Screen {
 
     }
 
+    private void drawGameObject(Texture texture){
+        this.game.batch.begin();
+        this.game.batch.draw(texture,0 - texture.getWidth()/2,0 - texture.getHeight()/2);
+        this.game.batch.end();
+    }
+
+    private void drawGameObject(GameObject go) {
+        this.game.batch.begin();
+        this.game.batch.draw(go.getTexture(),
+                Math.round(go.getX() - go.getTexture().getWidth()/2),
+                Math.round(go.getY() - go.getTexture().getHeight()/2));
+        this.game.batch.end();
+    }
+
     private void handleInput() {
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            this.bucket.moveHorizontal(-10);
-        } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            this.bucket.moveHorizontal(10);
-        }
+
     }
 
     private void spawnRain() {
-        if (Math.round(Math.random() * 100) == Math.round(Math.random() * 100)) {
-            Drop drop = new Drop();
-            drop.setTexture(new Texture("drop.png"));
-            drop.setX((int) (0 - WIDTH / 3 + Math.round(Math.random() * 100)));
-            drop.setY(0 + HEIGHT / 3);
+        if (Math.round(Math.random() * 60) == Math.round(Math.random() * 60)) {
+            Drop drop = new Drop(new Texture("drop.png"),
+                    (double) (0 - WIDTH / 3 + Math.round(Math.random() * WIDTH)),
+                    0 + HEIGHT / 3);
             drops.add(drop);
-            for(Iterator<Drop> i = drops.iterator();i.hasNext();){
-                if(i.next().getY() <= -10){
-                    i.remove();
+        }
+    }
+
+    private void dropRain() {
+        for (Drop drop : drops) {
+            drop.moveVertical();
+            drawGameObject(drop);
+        }
+    }
+
+    private void cleanDrop() {
+        if (drops.isEmpty()) return;
+        try {
+            for (Drop drop : drops) {
+                if (drop.getY() <= (double) (0 - WIDTH / 3 + Math.round(Math.random() * 100)) - drop.getTexture().getHeight()) {
+                    drops.remove(drop);
                     dropSound.play();
                 }
             }
+        } catch (Exception e) {
+            Gdx.app.error("ERROR", e.getMessage());
         }
     }
 }

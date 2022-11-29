@@ -3,12 +3,14 @@ package com.maru.game.model;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
-public class Drop {
-    private Texture texture;
-    private double x;
-    private double y;
-
+public class Drop extends GameObject{
     public Drop() {
+    }
+
+    public Drop(Texture texture, double x, double y) {
+        this.texture = texture;
+        this.x = x;
+        this.y = y;
     }
 
     public Texture getTexture() {
